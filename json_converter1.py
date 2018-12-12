@@ -1,6 +1,6 @@
 from flask import Flask
 from PIL import Image
-#from flask_restful import Resource, Api
+# from flask_restful import Resource, Api
 from flask import request
 #from flask_api import FlaskAPI
 
@@ -19,23 +19,23 @@ import shutil
 from glob import glob
 from google.cloud import vision
 
-# from google.cloud import language
-# from google.cloud.language import enums
-# from google.cloud.language import types
+#from google.cloud import language
+#from google.cloud.language import enums
+#from google.cloud.language import types
 
 import requests
 import base64
 from pdf2jpg import pdf2jpg
 ###
-import pandas as pd
+
 from pandas.compat import StringIO
-import numpy as np
-from PIL import Image
+
+
 import pytesseract
 from pytesseract import image_to_string, image_to_osd
-import base64
-import io
-import json
+
+
+
 ###
 
 #from file_encrypter import image_64_encode
@@ -45,13 +45,22 @@ import json
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'Banking-326c0d0e12c1.json'
 client = vision.ImageAnnotatorClient()
 
-
 app = Flask(__name__)
+
+
+@app.route('/', methods=['GET'])
+def index():  
+    content = get_file('index.html')
+    return Response(content, mimetype="text/html")
 
 @app.route('/process_scan', methods=['POST'])
 
-def process_scan():
 
+def process_scan():
+    # def process_scan(emviron, start_response):
+    # print(emviron)
+    # print("------")
+    # print(start_response)
     pdf_64_encode = request.get_data()
     image_64_encode= pdf64_to_img64(pdf_64_encode)
     ##
@@ -79,7 +88,6 @@ def process_scan():
     Data = pd.DataFrame(Data)
 
     Data = Data.transpose()
-    Data
 
     Invoice_Description = Data.to_json(orient='records', lines=False)
     Invoice_Description = json.loads(Invoice_Description)
@@ -104,13 +112,13 @@ def process_scan():
     with open('Final_Result.json') as json_data:
         jsonresult = json_data.read()
 
-    print(jsonresult)
+    #print(jsonresult)
 
     #os.remove('Result1_table.json')
     #os.remove('Result1.json')
-    os.remove('sample.pdf')
+    #os.remove('sample.pdf')
 
-    shutil.rmtree('data\\')
+    #shutil.rmtree('data/')
 
     return jsonresult
 ###
@@ -281,12 +289,12 @@ def information_extract(rendered_text):
 
     return pd.Series({'From': frm, 'To': to, 'Invoice_detail': inv, 'Total': tot})
 
-if __name__ == '__main__':
-    app.debug = True
+def get_file(filename):
+    with open(filename) as f:
+        return f.read()
+
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
-# if __name__ == '__main__':
-#     app.run(debug=True)
-
 
 ##
