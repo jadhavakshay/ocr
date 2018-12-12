@@ -19,22 +19,16 @@ from glob import glob
 content_type = 'PDF/pdf'
 headers = {'content-type': content_type}
 
-pdf = open('format1.pdf', "rb").read()
-
+pdf = open('input_file.pdf', "rb").read()
 
 pdf_64_encode =base64.encodebytes(pdf)
 pdf_64_encode
 
 #print(image_64_encode)
-api_url = 'http://127.0.0.1:5000/process_scan'
+api_url = 'http://0.0.0.0:5000/process_scan'
 
 # send http request with image and receive response
 response = requests.post(url=api_url, data=pdf_64_encode, headers=headers)
 print(response)
 print(response.content)
 #
-
-
-
-
-
