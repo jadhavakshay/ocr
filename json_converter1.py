@@ -1,6 +1,6 @@
 from flask import Flask
 from PIL import Image
-from flask_restful import Resource, Api
+#from flask_restful import Resource, Api
 from flask import request
 #from flask_api import FlaskAPI
 
