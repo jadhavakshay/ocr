@@ -1,0 +1,10 @@
+Flask
+pytesseract
+google.cloud
+google
+google.cloud.vision
+pandas
+numpy
+pdf2jpg
+opencv-python
+opencv-contrib-python
