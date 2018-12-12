@@ -2,8 +2,7 @@ from flask import Flask
 from PIL import Image
 from flask_restful import Resource, Api
 from flask import request
-import sys
-
+#from flask_api import FlaskAPI
 
 import io
 import re
@@ -12,7 +11,7 @@ os.chdir(os.getcwd())
 import json
 import numpy as np
 import pandas as pd
-import cv2
+#import cv2
 
 import datetime as dt
 import six
@@ -38,7 +37,7 @@ import base64
 import io
 import json
 ###
-#%%
+
 #from file_encrypter import image_64_encode
 #from Invoice_reader_format import json_output
 
@@ -48,111 +47,91 @@ client = vision.ImageAnnotatorClient()
 
 
 app = Flask(__name__)
-#%%
+
 @app.route('/process_scan', methods=['POST'])
 
 def process_scan():
 
-    try:
-        # Add some columns
-        # Split columns
-        pdf_64_encode = request.get_data()
-        image_64_encode= pdf64_to_img64(pdf_64_encode)
-        ##
-        content = base64.decodebytes(image_64_encode)
+    pdf_64_encode = request.get_data()
+    image_64_encode= pdf64_to_img64(pdf_64_encode)
+    ##
+    content = base64.decodebytes(image_64_encode)
 
-        dataBytesIO = io.BytesIO(content)
-        im = Image.open(dataBytesIO)
-        data_crop = to_create_datacrop_main(im)
-        #data_crop.to_json('Result1_table.json', orient='records', lines=False)
+    dataBytesIO = io.BytesIO(content)
+    im = Image.open(dataBytesIO)
+    data_crop = to_create_datacrop_main(im)
+    #data_crop.to_json('Result1_table.json', orient='records', lines=False)
 
-        ##
+    ##
 
-        ##google
-        response = client.document_text_detection({'content': content})  # [1]
-        texts = response.text_annotations
-        rendered_text = texts[np.argmax([len(t.description) for t in texts])].description.split('\n')
 
-        corpus = [' '.join(rendered_text)]
 
-        Data = information_extract(rendered_text)
 
-        Data = pd.DataFrame(Data)
+    ##google
+    response = client.document_text_detection({'content': content})  # [1]
+    texts = response.text_annotations
+    rendered_text = texts[np.argmax([len(t.description) for t in texts])].description.split('\n')
 
-        Data = Data.transpose()
-        Data
+    corpus = [' '.join(rendered_text)]
 
-        Invoice_Description = Data.to_json(orient='records', lines=False)
-        Invoice_Description = json.loads(Invoice_Description)
-        Invoice_Description = json.dumps(Invoice_Description)
+    Data = information_extract(rendered_text)
 
-        Invoice_details = data_crop.to_json(orient='records', lines=False)
-        Invoice_details = json.loads(Invoice_details)
-        Invoice_details = json.dumps(Invoice_details)
+    Data = pd.DataFrame(Data)
 
-        import re
-        p = re.compile(r"[.*^}]]")
-        Invoice_Description = re.sub(p, '', Invoice_Description)
+    Data = Data.transpose()
+    Data
 
-        Invoice_details = Invoice_details + '}]'
-        result = Invoice_Description + "," + str("\"LineItems\"") + ":" + Invoice_details
+    Invoice_Description = Data.to_json(orient='records', lines=False)
+    Invoice_Description = json.loads(Invoice_Description)
+    Invoice_Description = json.dumps(Invoice_Description)
 
-        output = json.loads(result)
+    Invoice_details = data_crop.to_json(orient='records', lines=False)
+    Invoice_details = json.loads(Invoice_details)
+    Invoice_details = json.dumps(Invoice_details)
 
-        with open('Final_Result.json', 'w') as outfile:
-            json.dump(output, outfile)
+    import re
+    p = re.compile(r"[.*^}]]")
+    Invoice_Description = re.sub(p, '', Invoice_Description)
 
-        with open('Final_Result.json') as json_data:
-            jsonresult = json_data.read()
+    Invoice_details = Invoice_details + '}]'
+    result = Invoice_Description + "," + str("\"LineItems\"") + ":" + Invoice_details
 
-        print(jsonresult)
+    output = json.loads(result)
 
-        #os.remove('Result1_table.json')
-        #os.remove('Result1.json')
-        # os.remove(str(filename+'.pdf'))
+    with open('Final_Result.json', 'w') as outfile:
+        json.dump(output, outfile)
 
-        #shutil.rmtree('data\\')
+    with open('Final_Result.json') as json_data:
+        jsonresult = json_data.read()
 
-        return jsonresult
+    print(jsonresult)
 
-    ###
-    # except http.client.RemoteDisconnected:
-    #     print("sorry")
-    # except urllib3.exceptions.ProtocolError:
-    #     print("sorry")
-    except requests.exceptions.ConnectionError:
-        print("sorry")
-    except ValueError:
-        print("sorry")
-    except TypeError:
-        print("sorry")
-    # except requests.exceptions.ConnectionError:
-    #     print("sorry")
-    # except requests.exceptions.ConnectionError:
-    #     print("sorry")
-        #sys.exit()
+    #os.remove('Result1_table.json')
+    #os.remove('Result1.json')
+    os.remove('sample.pdf')
+
+    shutil.rmtree('data\\')
+
+    return jsonresult
+###
 
 ''' Functions '''
 
 
 def pdf64_to_img64(pdf_read):
-    filename = "{}".format(os.getpid())
-    with open(str(filename+'.pdf'), "wb") as f:
+    with open("sample.pdf", "wb") as f:
         f.write(base64.decodebytes(pdf_read))
 
-
-    inputpath = str(filename+'.pdf')
-    outputpath = filename
+    inputpath = r"sample.pdf"
+    outputpath = r"data"
     pdf2jpg.convert_pdf2jpg(inputpath, outputpath, pages="ALL")
 
-    image_path = glob(os.path.join(str(filename+'\\'+filename+'.pdf'), '*.jpg'))
+    image_path = glob(os.path.join('data/sample.pdf', '*.jpg'))
     image_path = image_path[0]
 
     image = open(image_path, 'rb')
     image_read = image.read()
     image_64_encode = base64.encodebytes(image_read)
-    os.remove(str(filename + '.pdf'))
-
     return image_64_encode
 
 def rendered(text):
@@ -301,15 +280,13 @@ def information_extract(rendered_text):
     tot = total(rendered)
 
     return pd.Series({'From': frm, 'To': to, 'Invoice_detail': inv, 'Total': tot})
-#%%
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.debug = True
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
+# if __name__ == '__main__':
+#     app.run(debug=True)
 
 
-
-#%%
-
-
-from pympler import asizeof
-asizeof.asizeof(process_scan)
+##
