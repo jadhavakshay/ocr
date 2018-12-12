@@ -1,9 +1,6 @@
 from flask import Flask
 from PIL import Image
-# from flask_restful import Resource, Api
 from flask import request
-#from flask_api import FlaskAPI
-
 import io
 import re
 import os
@@ -11,35 +8,14 @@ os.chdir(os.getcwd())
 import json
 import numpy as np
 import pandas as pd
-#import cv2
-
-import datetime as dt
-import six
-import shutil
 from glob import glob
 from google.cloud import vision
-
-#from google.cloud import language
-#from google.cloud.language import enums
-#from google.cloud.language import types
-
 import requests
 import base64
 from pdf2jpg import pdf2jpg
-###
-
-from pandas.compat import StringIO
-
-
-import pytesseract
-from pytesseract import image_to_string, image_to_osd
-
 
 
 ###
-
-#from file_encrypter import image_64_encode
-#from Invoice_reader_format import json_output
 
 # Set Google API authentication and set folder where images are stored
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'Banking-326c0d0e12c1.json'
