@@ -19,9 +19,9 @@ import shutil
 from glob import glob
 from google.cloud import vision
 
-from google.cloud import language
-from google.cloud.language import enums
-from google.cloud.language import types
+# from google.cloud import language
+# from google.cloud.language import enums
+# from google.cloud.language import types
 
 import requests
 import base64
